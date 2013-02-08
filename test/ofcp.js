@@ -149,5 +149,23 @@ describe('ofcp', function() {
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(false)
         })
+
+        it('it is true for lower three of a kind in front than mid', function() {
+            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
+            , mid = ['Ts', 'Td', 'Tc', '7h', '3d']
+            , front = ['Qd', 'Qc', 'Qd']
+
+            var actual = ofcp.isFoul(back, mid, front)
+            expect(actual).to.be(true)
+        })
+
+        it('it is false for lower three of a kind in front than mid', function() {
+            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
+            , mid = ['Qs', 'Qd', 'Qc', '7h', '3d']
+            , front = ['Td', 'Tc', 'Td']
+
+            var actual = ofcp.isFoul(back, mid, front)
+            expect(actual).to.be(false)
+        })
     })
 })
