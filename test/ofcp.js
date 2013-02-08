@@ -177,4 +177,120 @@ describe('ofcp', function() {
             expect(actual).to.be(true)
         })
     })
+
+    describe('settleBack', function() {
+        it('it gives one point for full house vs trips', function() {
+            var back1 = ['7s', '7d', '7h', '2d', '2c']
+            , back2 = ['As', 'Ad', 'Ah', '2d', '4c']
+            , actual = ofcp.settleBack(back1, back2)
+            expect(actual).to.be(1)
+        })
+
+        it('it gives minus one point for trips vs full house', function() {
+            var back1 = ['As', 'Ad', 'Ah', '2d', '4c']
+            , back2 = ['7s', '7d', '7h', '2d', '2c']
+            , actual = ofcp.settleBack(back1, back2)
+            expect(actual).to.be(-1)
+        })
+
+        it('it gives one point to the better full house', function() {
+            var back1 = ['7s', '7d', '7h', '2d', '2c']
+            , back2 = ['6d', '6c', '6h', '4d', '4c']
+            , actual = ofcp.settleBack(back1, back2)
+            expect(actual).to.be(1)
+        })
+    })
+
+    describe('settleMid', function() {
+        it('it gives one point for full house vs trips', function() {
+            var mid1 = ['7s', '7d', '7h', '2d', '2c']
+            , mid2 = ['As', 'Ad', 'Ah', '2d', '4c']
+            , actual = ofcp.settleMid(mid1, mid2)
+            expect(actual).to.be(1)
+        })
+
+        it('it gives minus one point for trips vs full house', function() {
+            var mid1 = ['As', 'Ad', 'Ah', '2d', '4c']
+            , mid2 = ['7s', '7d', '7h', '2d', '2c']
+            , actual = ofcp.settleMid(mid1, mid2)
+            expect(actual).to.be(-1)
+        })
+
+        it('it gives one point to the better full house', function() {
+            var mid1 = ['7s', '7d', '7h', '2d', '2c']
+            , mid2 = ['6d', '6c', '6h', '4d', '4c']
+            , actual = ofcp.settleMid(mid1, mid2)
+            expect(actual).to.be(1)
+        })
+    })
+
+    describe('settleFront', function() {
+        it('it pushes same pair and kicker', function() {
+            var front1 = ['7s', '7c', 'Ah']
+            , front2 = ['7h', '7d', 'Ac']
+            , actual = ofcp.settleFront(front1, front2)
+            expect(actual).to.be(0)
+        })
+
+        it('it gives one point to higher kicker', function() {
+            var front1 = ['7s', '7c', 'Ah']
+            , front2 = ['7h', '7d', 'Kc']
+            , actual = ofcp.settleFront(front1, front2)
+            expect(actual).to.be(1)
+        })
+
+        it('it gives minus one point to lower kicker', function() {
+            var front1 = ['7s', '7c', 'Kh']
+            , front2 = ['7h', '7d', 'Ac']
+            , actual = ofcp.settleFront(front1, front2)
+            expect(actual).to.be(-1)
+        })
+    })
+
+    describe('settle', function() {
+        it('pushes two foul hands', function() {
+            var hand1 = {
+                back: ['4s', '4d', '7h', '9d', 'Jc'],
+                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
+                front: ['Qh', 'Ah', '9c']
+            }
+            , hand2 = {
+                back: ['4s', '4d', '7h', '9d', 'Jc'],
+                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
+                front: ['Qh', 'Ah', '9c']
+            }
+            , actual = ofcp.settle(hand1, hand2)
+            expect(actual).to.be(0)
+        })
+
+        it('returns six when first hand scoops', function() {
+            var hand1 = {
+                back: ['4s', '5s', '6s', '7s', '8s'],
+                mid: ['3d', '5d', 'Td', 'Jd', '4d'],
+                front: ['Qh', 'Qd', 'Qs']
+            }
+            , hand2 = {
+                back: ['4s', '4d', '7h', '9d', 'Jc'],
+                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
+                front: ['Qh', 'Ah', '9c']
+            }
+            , actual = ofcp.settle(hand1, hand2)
+            expect(actual).to.be(6)
+        })
+
+        it('returns six when second hand scoops', function() {
+            var hand1 = {
+                back: ['4s', '4d', '7h', '9d', 'Jc'],
+                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
+                front: ['Qh', 'Ah', '9c']
+            }
+            , hand2 = {
+                back: ['4s', '5s', '6s', '7s', '8s'],
+                mid: ['3d', '5d', 'Td', 'Jd', '4d'],
+                front: ['Qh', 'Qd', 'Qs']
+            }
+            , actual = ofcp.settle(hand1, hand2)
+            expect(actual).to.be(-6)
+        })
+    })
 })
