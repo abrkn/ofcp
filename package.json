@@ -1,0 +1,27 @@
+{
+    "name": "ofcp",
+    "version": "0.0.1",
+    "description": "open face chinese poker library",
+    "author": "Andreas Brekken <a@abrkn.com>",
+    "scripts": {
+        "test": "mocha"
+    },
+    "main": "./lib/ofcp",
+    "keywords": [
+        "open",
+        "face",
+        "chinese",
+        "poker"
+    ],
+    "dependencies": {
+        "poker-evaluator": "git://github.com/abrkn/poker-evaluator.git"
+    },
+    "devDependencies": {
+        "mocha": "1.8.1",
+        "expect.js": "0.2.0",
+        "underscore": "1.4.4"
+    },
+    "engines": {
+        "node": ">=0.8"
+    }
+}
