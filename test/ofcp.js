@@ -167,5 +167,14 @@ describe('ofcp', function() {
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(false)
         })
+
+        it('it is true for higher on pair in front than mid', function() {
+            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
+            , mid = ['2s', '2c', '8d', '7h', '3d']
+            , front = ['2d', '2h', '9c']
+
+            var actual = ofcp.isFoul(back, mid, front)
+            expect(actual).to.be(true)
+        })
     })
 })
