@@ -176,6 +176,15 @@ describe('ofcp', function() {
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(true)
         })
+
+        it('is true in problematic example', function() {
+            var back = ['5d', '4d', '9d', 'qs', '5s'] // pair of 5
+            , mid = ['8h', '4c', 'kd', 'th', 'js'] // king high
+            , front = ['ks', '7s', 'ad'] // ace high
+
+            var actual = ofcp.isFoul(back, mid, front)
+            expect(actual).to.be(true)
+        })
     })
 
     describe('settleBack', function() {
