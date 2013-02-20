@@ -2,6 +2,30 @@ var ofcp = require('../lib/ofcp')
 , expect = require('expect.js')
 
 describe('ofcp', function() {
+    describe('settle', function() {
+        it('does not reward two points for winning two hands', function() {
+            var hand1 = {
+                // straight, +1
+                back: ofcp.hand('7c 4d 8c 5d 6h'),
+                // 8s, -1
+                mid: ofcp.hand('3c 8h 8d 7s 2d'),
+                // king, jack +1
+                front: ofcp.hand('2h js kd')
+            }
+            , hand2 = {
+                // trips, -1
+                back: ofcp.hand('qs 9s qd qc 5c'),
+                // 9s, +1
+                mid: ofcp.hand('9d ah 9c 5h 6c'),
+                // king 4, -1
+                front: ofcp.hand('ks 3h 4c')
+            }
+
+            var settlement = ofcp.settle(hand1, hand2)
+            expect(settlement).to.be(1)
+        })
+    })
+
     describe('evalBackHand', function() {
         it('is consistent with poker-evaluator example 1', function() {
             var hand = ['As', 'Ks', 'Qs', 'Js', 'Ts']
@@ -253,6 +277,13 @@ describe('ofcp', function() {
             , front2 = ['7h', '7d', 'Ac']
             , actual = ofcp.settleFront(front1, front2)
             expect(actual).to.be(-1)
+        })
+
+        it('does not push on problematic example', function() {
+            var front1 = ofcp.hand('2h js kd')
+            , front2 = ofcp.hand('ks 3h 4c')
+            , actual = ofcp.settleFront(front1, front2)
+            expect(actual).to.be(1)
         })
     })
 
