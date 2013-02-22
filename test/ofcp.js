@@ -24,11 +24,33 @@ describe('ofcp', function() {
             var settlement = ofcp.settle(hand1, hand2)
             expect(settlement).to.be(1)
         })
+
+        it('gives point to the correct hand', function() {
+            var hand1 = {
+                // 55
+                back: ofcp.hand('th jc 5c 5d 9c'),
+                // kj
+                mid: ofcp.hand('js 8h 7s ts kd'),
+                // 7
+                front: ofcp.hand('6s 2s 7c')
+            }
+            , hand2 = {
+                // 44
+                back: ofcp.hand('5s 4d 8s 4h td'),
+                // a
+                mid: ofcp.hand('2d ah 8c 4c 9h'),
+                // q
+                front: ofcp.hand('3c ks qs')
+            }
+
+            var settlement = ofcp.settle(hand1, hand2)
+            expect(settlement).to.be(-1)
+        })
     })
 
     describe('evalBackHand', function() {
         it('is consistent with poker-evaluator example 1', function() {
-            var hand = ['As', 'Ks', 'Qs', 'Js', 'Ts']
+            var hand = ofcp.hand('As Ks Qs Js Ts')
             , expected = {
                 handType: 9,
                 handRank: 10,
@@ -40,7 +62,7 @@ describe('ofcp', function() {
         })
 
         it('is consistent with poker-evaluator example 2', function() {
-            var hand = ['Ad', 'Kd', 'Qd', 'Jd', 'Td']
+            var hand = ofcp.hand('Ad Kd Qd Jd Td')
             , expected = {
                 handType: 9,
                 handRank: 10,
@@ -52,8 +74,8 @@ describe('ofcp', function() {
         })
 
         it('prefers higher three of a kind', function() {
-            var hand1 = ['6d', '6h', '6c', 'Ks', 'Ac']
-            , hand2 =  ['7d', '7h', '7c', 'Kd', 'Ah']
+            var hand1 = ofcp.hand('6d 6h 6c Ks Ac')
+            , hand2 =  ofcp.hand('7d 7h 7c Kd Ah')
             , rank1 = ofcp.evalBackHand(hand1)
             , rank2 = ofcp.evalBackHand(hand2)
             expect(rank1.handName).to.be('three of a kind')
@@ -64,7 +86,7 @@ describe('ofcp', function() {
 
     describe('evalMidHand', function() {
         it('is consistent with evalBackHand', function() {
-            var hand = ['As', 'Ks', 'Qs', 'Js', 'Ts']
+            var hand = ofcp.hand('As Ks Qs Js Ts')
             , expected = ofcp.evalBackHand(hand)
             , actual = ofcp.evalMidHand(hand)
             expect(actual).to.eql(expected)
@@ -74,13 +96,13 @@ describe('ofcp', function() {
     describe('evalFrontHand', function() {
         it('throws if passed more than three cards', function() {
             expect(function() {
-                ofcp.evalFrontHand(['As', 'Kh', 'Ac', '7d'])
+                ofcp.evalFrontHand(ofcp.hand('As Kh Ac 7d'))
             }).to.throwError(/cards/)
         })
 
         it('throws if passed less than three cards', function() {
             expect(function() {
-                ofcp.evalFrontHand(['As', 'Kh', 'Ac', '7d'])
+                ofcp.evalFrontHand(ofcp.hand('As Kh Ac 7d'))
             }).to.throwError(/cards/)
         })
 
@@ -91,7 +113,7 @@ describe('ofcp', function() {
         })
 
         it('recognizes three of a kind', function() {
-            var hand = ['4d', '4s', '4h']
+            var hand = ofcp.hand('4d 4s 4h')
             , expected = {
                 handType: 4,
                 handRank: 3,
@@ -102,15 +124,15 @@ describe('ofcp', function() {
         })
 
         it('recognizes pair', function() {
-            var hand = ['4d', '4s', '2h']
+            var hand = ofcp.hand('4d 4s 2h')
             , rank = ofcp.evalFrontHand(hand)
             expect(rank.handName).to.be('one pair')
             expect(rank.handRank).to.be(13 * 3 + 1)
         })
 
         it('ranks high card with kickers', function() {
-            var hand1 = ['As', 'Ks', 'Qs']
-            , hand2 = ['Ad', 'Kd', 'Jd']
+            var hand1 = ofcp.hand('As Ks Qs')
+            , hand2 = ofcp.hand('Ad Kd Jd')
             , rank1 = ofcp.evalFrontHand(hand1)
             , rank2 = ofcp.evalFrontHand(hand2)
             expect(rank1.handName).to.be('high card')
@@ -121,90 +143,90 @@ describe('ofcp', function() {
 
     describe('isFoul', function() {
         it('it fouls if back is of lower rank than mid', function() {
-            var back = ['Ks', 'Kd', '9d', '3h', '8h']
-            , mid = ['As', 'Ad', 'Ac', '7h', '3d']
-            , front = ['Qd', 'Jh', '8c']
+            var back = ofcp.hand('Ks Kd 9d 3h 8h')
+            , mid = ofcp.hand('As Ad Ac 7h 3d')
+            , front = ofcp.hand('Qd Jh 8c')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(true)
         })
 
         it('it does not foul when back is higher rank than mid', function() {
-            var back = ['Ks', 'Kd', '9d', '3h', '8h']
-            , mid = ['5s', '5d', 'Ac', '7h', '3d']
-            , front = ['Qd', 'Jh', '8c']
+            var back = ofcp.hand('Ks Kd 9d 3h 8h')
+            , mid = ofcp.hand('5s 5d Ac 7h 3d')
+            , front = ofcp.hand('Qd Jh 8c')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(false)
         })
 
         it('it is true for higher pair in front than mid', function() {
-            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
-            , mid = ['2s', '2d', 'Ac', '7h', '3d']
-            , front = ['3d', '3c', '8c']
+            var back = ofcp.hand('Ks Kd Kc 3h 8h')
+            , mid = ofcp.hand('2s 2d Ac 7h 3d')
+            , front = ofcp.hand('3d 3c 8c')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(true)
         })
 
         it('it is false for lower pair in front than mid', function() {
-            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
-            , mid = ['5s', '5d', 'Ac', '7h', '3d']
-            , front = ['3d', '3c', '8c']
+            var back = ofcp.hand('Ks Kd Kc 3h 8h')
+            , mid = ofcp.hand('5s 5d Ac 7h 3d')
+            , front = ofcp.hand('3d 3c 8c')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(false)
         })
 
         it('it is true for higher high card in front than mid', function() {
-            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
-            , mid = ['2s', '6d', 'Kh', '7h', '3d']
-            , front = ['Ad', '3c', '8c']
+            var back = ofcp.hand('Ks Kd Kc 3h 8h')
+            , mid = ofcp.hand('2s 6d Kh 7h 3d')
+            , front = ofcp.hand('Ad 3c 8c')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(true)
         })
 
         it('it is false for lower high card in front than mid', function() {
-            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
-            , mid = ['Qs', '5d', 'Tc', '7h', '3d']
-            , front = ['Jd', '3c', '8c']
+            var back = ofcp.hand('Ks Kd Kc 3h 8h')
+            , mid = ofcp.hand('Qs 5d Tc 7h 3d')
+            , front = ofcp.hand('Jd 3c 8c')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(false)
         })
 
         it('it is true for lower three of a kind in front than mid', function() {
-            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
-            , mid = ['Ts', 'Td', 'Tc', '7h', '3d']
-            , front = ['Qd', 'Qc', 'Qd']
+            var back = ofcp.hand('Ks Kd Kc 3h 8h')
+            , mid = ofcp.hand('Ts Td Tc 7h 3d')
+            , front = ofcp.hand('Qd Qc Qd')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(true)
         })
 
         it('it is false for lower three of a kind in front than mid', function() {
-            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
-            , mid = ['Qs', 'Qd', 'Qc', '7h', '3d']
-            , front = ['Td', 'Tc', 'Td']
+            var back = ofcp.hand('Ks Kd Kc 3h 8h')
+            , mid = ofcp.hand('Qs Qd Qc 7h 3d')
+            , front = ofcp.hand('Td Tc Td')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(false)
         })
 
         it('it is true for higher on pair in front than mid', function() {
-            var back = ['Ks', 'Kd', 'Kc', '3h', '8h']
-            , mid = ['2s', '2c', '8d', '7h', '3d']
-            , front = ['2d', '2h', '9c']
+            var back = ofcp.hand('Ks Kd Kc 3h 8h')
+            , mid = ofcp.hand('2s 2c 8d 7h 3d')
+            , front = ofcp.hand('2d 2h 9c')
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(true)
         })
 
         it('is true in problematic example', function() {
-            var back = ['5d', '4d', '9d', 'qs', '5s'] // pair of 5
-            , mid = ['8h', '4c', 'kd', 'th', 'js'] // king high
-            , front = ['ks', '7s', 'ad'] // ace high
+            var back = ofcp.hand('5d 4d 9d qs 5s') // pair of 5
+            , mid = ofcp.hand('8h 4c kd th js') // king high
+            , front = ofcp.hand('ks 7s ad') // ace high
 
             var actual = ofcp.isFoul(back, mid, front)
             expect(actual).to.be(true)
@@ -213,22 +235,22 @@ describe('ofcp', function() {
 
     describe('settleBack', function() {
         it('it gives one point for full house vs trips', function() {
-            var back1 = ['7s', '7d', '7h', '2d', '2c']
-            , back2 = ['As', 'Ad', 'Ah', '2d', '4c']
+            var back1 = ofcp.hand('7s 7d 7h 2d 2c')
+            , back2 = ofcp.hand('As Ad Ah 2d 4c')
             , actual = ofcp.settleBack(back1, back2)
             expect(actual).to.be(1)
         })
 
         it('it gives minus one point for trips vs full house', function() {
-            var back1 = ['As', 'Ad', 'Ah', '2d', '4c']
-            , back2 = ['7s', '7d', '7h', '2d', '2c']
+            var back1 = ofcp.hand('As Ad Ah 2d 4c')
+            , back2 = ofcp.hand('7s 7d 7h 2d 2c')
             , actual = ofcp.settleBack(back1, back2)
             expect(actual).to.be(-1)
         })
 
         it('it gives one point to the better full house', function() {
-            var back1 = ['7s', '7d', '7h', '2d', '2c']
-            , back2 = ['6d', '6c', '6h', '4d', '4c']
+            var back1 = ofcp.hand('7s 7d 7h 2d 2c')
+            , back2 = ofcp.hand('6d 6c 6h 4d 4c')
             , actual = ofcp.settleBack(back1, back2)
             expect(actual).to.be(1)
         })
@@ -236,22 +258,22 @@ describe('ofcp', function() {
 
     describe('settleMid', function() {
         it('it gives one point for full house vs trips', function() {
-            var mid1 = ['7s', '7d', '7h', '2d', '2c']
-            , mid2 = ['As', 'Ad', 'Ah', '2d', '4c']
+            var mid1 = ofcp.hand('7s 7d 7h 2d 2c')
+            , mid2 = ofcp.hand('As Ad Ah 2d 4c')
             , actual = ofcp.settleMid(mid1, mid2)
             expect(actual).to.be(1)
         })
 
         it('it gives minus one point for trips vs full house', function() {
-            var mid1 = ['As', 'Ad', 'Ah', '2d', '4c']
-            , mid2 = ['7s', '7d', '7h', '2d', '2c']
+            var mid1 = ofcp.hand('As Ad Ah 2d 4c')
+            , mid2 = ofcp.hand('7s 7d 7h 2d 2c')
             , actual = ofcp.settleMid(mid1, mid2)
             expect(actual).to.be(-1)
         })
 
         it('it gives one point to the better full house', function() {
-            var mid1 = ['7s', '7d', '7h', '2d', '2c']
-            , mid2 = ['6d', '6c', '6h', '4d', '4c']
+            var mid1 = ofcp.hand('7s 7d 7h 2d 2c')
+            , mid2 = ofcp.hand('6d 6c 6h 4d 4c')
             , actual = ofcp.settleMid(mid1, mid2)
             expect(actual).to.be(1)
         })
@@ -259,22 +281,22 @@ describe('ofcp', function() {
 
     describe('settleFront', function() {
         it('it pushes same pair and kicker', function() {
-            var front1 = ['7s', '7c', 'Ah']
-            , front2 = ['7h', '7d', 'Ac']
+            var front1 = ofcp.hand('7s 7c Ah')
+            , front2 = ofcp.hand('7h 7d Ac')
             , actual = ofcp.settleFront(front1, front2)
             expect(actual).to.be(0)
         })
 
         it('it gives one point to higher kicker', function() {
-            var front1 = ['7s', '7c', 'Ah']
-            , front2 = ['7h', '7d', 'Kc']
+            var front1 = ofcp.hand('7s 7c Ah')
+            , front2 = ofcp.hand('7h 7d Kc')
             , actual = ofcp.settleFront(front1, front2)
             expect(actual).to.be(1)
         })
 
         it('it gives minus one point to lower kicker', function() {
-            var front1 = ['7s', '7c', 'Kh']
-            , front2 = ['7h', '7d', 'Ac']
+            var front1 = ofcp.hand('7s 7c Kh')
+            , front2 = ofcp.hand('7h 7d Ac')
             , actual = ofcp.settleFront(front1, front2)
             expect(actual).to.be(-1)
         })
@@ -290,14 +312,14 @@ describe('ofcp', function() {
     describe('settle', function() {
         it('pushes two foul hands', function() {
             var hand1 = {
-                back: ['4s', '4d', '7h', '9d', 'Jc'],
-                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
-                front: ['Qh', 'Ah', '9c']
+                back: ofcp.hand('4s 4d 7h 9d Jc'),
+                mid: ofcp.hand('5d 5h Ts 9h Ac'),
+                front: ofcp.hand('Qh Ah 9c')
             }
             , hand2 = {
-                back: ['4s', '4d', '7h', '9d', 'Jc'],
-                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
-                front: ['Qh', 'Ah', '9c']
+                back: ofcp.hand('4s 4d 7h 9d Jc'),
+                mid: ofcp.hand('5d 5h Ts 9h Ac'),
+                front: ofcp.hand('Qh Ah 9c')
             }
             , actual = ofcp.settle(hand1, hand2)
             expect(actual).to.be(0)
@@ -305,14 +327,14 @@ describe('ofcp', function() {
 
         it('returns six when first hand scoops', function() {
             var hand1 = {
-                back: ['4s', '5s', '6s', '7s', '8s'],
-                mid: ['3d', '5d', 'Td', 'Jd', '4d'],
-                front: ['Qh', 'Qd', 'Qs']
+                back: ofcp.hand('4s 5s 6s 7s 8s'),
+                mid: ofcp.hand('3d 5d Td Jd 4d'),
+                front: ofcp.hand('Qh Qd Qs')
             }
             , hand2 = {
-                back: ['4s', '4d', '7h', '9d', 'Jc'],
-                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
-                front: ['Qh', 'Ah', '9c']
+                back: ofcp.hand('4s 4d 7h 9d Jc'),
+                mid: ofcp.hand('5d 5h Ts 9h Ac'),
+                front: ofcp.hand('Qh Ah 9c')
             }
             , actual = ofcp.settle(hand1, hand2)
             expect(actual).to.be(6)
@@ -320,14 +342,14 @@ describe('ofcp', function() {
 
         it('returns six when second hand scoops', function() {
             var hand1 = {
-                back: ['4s', '4d', '7h', '9d', 'Jc'],
-                mid: ['5d', '5h', 'Ts', '9h', 'Ac'],
-                front: ['Qh', 'Ah', '9c']
+                back: ofcp.hand('4s 4d 7h 9d Jc'),
+                mid: ofcp.hand('5d 5h Ts 9h Ac'),
+                front: ofcp.hand('Qh Ah 9c')
             }
             , hand2 = {
-                back: ['4s', '5s', '6s', '7s', '8s'],
-                mid: ['3d', '5d', 'Td', 'Jd', '4d'],
-                front: ['Qh', 'Qd', 'Qs']
+                back: ofcp.hand('4s 5s 6s 7s 8s'),
+                mid: ofcp.hand('3d 5d Td Jd 4d'),
+                front: ofcp.hand('Qh Qd Qs')
             }
             , actual = ofcp.settle(hand1, hand2)
             expect(actual).to.be(-6)
