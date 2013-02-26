@@ -1,6 +1,6 @@
 {
     "name": "ofcp",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "open face chinese poker library",
     "author": "Andreas Brekken <a@abrkn.com>",
     "scripts": {
