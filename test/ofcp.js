@@ -405,6 +405,14 @@ describe('ofcp', function() {
             expect(actual).to.be(30)
         })
 
+        it('gives points for four of a kind when rule is on', function() {
+            var actual = ofcp.getBackBonus(
+                ofcp.hand('Ts Td Th Tc As'),
+                { back: [2, 4, 6, 10, 15, 30] }
+            )
+            expect(actual).to.be(10)
+        })
+
         it('gives points for royal flush when rule is on', function() {
             var actual = ofcp.getBackBonus(
                 ofcp.hand('Td Jd Qd Kd Ad'),
