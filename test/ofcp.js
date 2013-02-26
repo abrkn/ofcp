@@ -342,17 +342,85 @@ describe('ofcp', function() {
 
         it('returns six when second hand scoops', function() {
             var hand1 = {
-                back: ofcp.hand('4s 4d 7h 9d Jc'),
-                mid: ofcp.hand('5d 5h Ts 9h Ac'),
-                front: ofcp.hand('Qh Ah 9c')
+                back: ofcp.hand('As 8d 7h 9d Jc'),
+                mid: ofcp.hand('5d 3h Ts 9h Ac'),
+                front: ofcp.hand('3h 4h 9c')
             }
             , hand2 = {
                 back: ofcp.hand('4s 5s 6s 7s 8s'),
-                mid: ofcp.hand('3d 5d Td Jd 4d'),
-                front: ofcp.hand('Qh Qd Qs')
+                mid: ofcp.hand('Qd 5d Td Jd 4d'),
+                front: ofcp.hand('Ah Qh Ks')
             }
             , actual = ofcp.settle(hand1, hand2)
             expect(actual).to.be(-6)
+        })
+    })
+
+    describe('getBackBonus', function() {
+        it('gives points for straight when rule is on', function() {
+            var actual = ofcp.getBackBonus(
+                ofcp.hand('5s 6d 7d 8c 9h'),
+                { back: [2, 0, 0, 0, 0, 0] }
+            )
+            expect(actual).to.be(2)
+        })
+
+        it('gives points for royal flush when rule is on', function() {
+            var actual = ofcp.getBackBonus(
+                ofcp.hand('Ts Js Qs Ks As'),
+                { back: [2, 4, 6, 10, 15, 30] }
+            )
+            expect(actual).to.be(30)
+        })
+
+        it('gives points for royal flush when rule is on', function() {
+            var actual = ofcp.getBackBonus(
+                ofcp.hand('Td Jd Qd Kd Ad'),
+                { back: [2, 4, 6, 10, 15, 30] }
+            )
+            expect(actual).to.be(30)
+        })
+
+        it('gives points for straight flush when rule is on', function() {
+            var actual = ofcp.getBackBonus(
+                ofcp.hand('9s Ts Js Qs Ks'),
+                { back: [2, 4, 6, 10, 15, 30] }
+            )
+            expect(actual).to.be(15)
+        })
+    })
+
+    describe('getFrontBonus', function() {
+        it('gives points for pair of sixes when rule is on', function() {
+            var actual = ofcp.getFrontBonus(
+                ofcp.hand('6s 6d 5h'),
+                { front: true }
+            )
+            expect(actual).to.be(1)
+        })
+
+        it('gives nine points for pair of aces when rule is on', function() {
+            var actual = ofcp.getFrontBonus(
+                ofcp.hand('As Ad 5h'),
+                { front: true }
+            )
+            expect(actual).to.be(9)
+        })
+
+        it('gives ten points for trip twos when rule is on', function() {
+            var actual = ofcp.getFrontBonus(
+                ofcp.hand('2s 2d 2h'),
+                { front: true }
+            )
+            expect(actual).to.be(10)
+        })
+
+        it('gives no points for pair of fives when rule is on', function() {
+            var actual = ofcp.getFrontBonus(
+                ofcp.hand('6s 5d 5h'),
+                { front: true }
+            )
+            expect(actual).to.be(0)
         })
     })
 })
