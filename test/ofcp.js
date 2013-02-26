@@ -354,6 +354,38 @@ describe('ofcp', function() {
             , actual = ofcp.settle(hand1, hand2)
             expect(actual).to.be(-6)
         })
+
+        it('includes bonuses', function() {
+            var hand1 = {
+                back: ofcp.hand('As Ad 7h 9d Jc'),
+                mid: ofcp.hand('5d Qh Qs 9h Ac'),
+                front: ofcp.hand('6h 6h 9c')
+            }
+            , hand2 = {
+                back: ofcp.hand('4s 5s 6s 7s 8s'),
+                mid: ofcp.hand('Qd 5d Th Jd 4d'),
+                front: ofcp.hand('Ah Qh Ks')
+            }
+            , actual = ofcp.settle(hand1, hand2, { front: true })
+            // scoop + one point for pair of six
+            expect(actual).to.be(7)
+        })
+
+        it('includes bonuse for mid', function() {
+            var hand1 = {
+                back: ofcp.hand('5h 6h 7h 8h Ah'),
+                mid: ofcp.hand('5d Qd Td 9d 7d'),
+                front: ofcp.hand('6h 6h 9c')
+            }
+            , hand2 = {
+                back: ofcp.hand('4s 5s 6s 7s 8s'),
+                mid: ofcp.hand('Qd 5d Th Jd 4d'),
+                front: ofcp.hand('Ah Qh Ks')
+            }
+            , actual = ofcp.settle(hand1, hand2, { mid: [100, 200, 300, 400, 500, 600], scoop: 10 })
+            // 3 for win, 10 for scoop, 200 for flush. 213
+            expect(actual).to.be(213)
+        })
     })
 
     describe('getBackBonus', function() {
